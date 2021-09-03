@@ -6,18 +6,19 @@ export class ArticleController{
     constructor(private readonly articleService: ArticleService){}
 
     @Post()
-    addArticle(
+    async addArticle(
             @Body('title') articleTitle: string, 
             @Body('body') articleBody: string,
             @Body('author') articleAuthor: string
-        ): any { //any can be changed to string or anything, because it will return to response
-        const generatedID = this.articleService.insertArticle(articleTitle, articleBody, articleAuthor);
+    ){ 
+        const generatedID = await this.articleService.insertArticle(articleTitle, articleBody, articleAuthor);
         return{id: generatedID};
     }
 
     @Get()
-    getAllArticle(){
-        return this.articleService.getArticle();
+    async getAllArticle(){
+        const articles = await this.articleService.getArticle();
+        return articles;
     }
     
     @Get(':id')
@@ -31,7 +32,7 @@ export class ArticleController{
         @Body('title') articleTitle: string, 
         @Body('body') articleBody: string 
     ) {
-        this.articleService.updateProduct(articleID, articleTitle, articleBody)
+        this.articleService.updateArticle(articleID, articleTitle, articleBody)
         return null;
     }
 
