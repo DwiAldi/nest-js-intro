@@ -36,10 +36,10 @@ export class UserController{
         return null;
     }
     
-    // @Delete(':id')
-    // removeUser(@Param('id') userUsername: string){
-    //     this.userService.deleteArticle(userUsername);
-    //     return null;
-    // }
+    @Delete(':id')
+    async removeUser(@Param('id') userUsername: string){
+        await this.userService.deleteArticle(userUsername);
+        return null;
+    }
 
 }

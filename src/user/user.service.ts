@@ -51,16 +51,16 @@ export class UserService{
         updatedUser.save();
     }
 
-    // deleteArticle(userUsername: string){
-    //     const index = this.findUser(userUsername)[1];
-    //     this.user.splice(index,1);
-    // }
+    async deleteArticle(userUsername: string){
+        await this.userModel.deleteOne({username: userUsername}).exec()
+
+    }
 
     private async findUser(username: string): Promise<User>{
         console.log(username)
         let user;
         try{
-            user = await this.userModel.findOne({"username": username});
+            user = await this.userModel.findOne({"username": username}).exec();
         }catch (error){
             throw new NotFoundException('Could not find user.');
         }
