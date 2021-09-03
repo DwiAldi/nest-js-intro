@@ -1,4 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
 import { Article } from "./article.model";
 
 
@@ -6,46 +8,64 @@ import { Article } from "./article.model";
 @Injectable()
 export class ArticleService{
     private article: Article[] = [];
+    
+    constructor(
+        @InjectModel('Article') private readonly articleModel: Model<Article>,
+    ){}
 
-    insertArticle(title: string, body: string, author: string){
-        const articleID = Math.floor(Math.random() * 1000);;
-        const newArticle = new Article(articleID, title, body, author);
-        this.article.push(newArticle);
-        return articleID;
+    async insertArticle(title: string, body: string, author: string){
+        const newArticle = new this.articleModel({
+            title: title,
+            body: body,
+            author: author
+        })
+        const result = await newArticle.save()
+        return result.id as string;
     }
 
-    getArticle(){
-        return [...this.article];
+    async getArticle(){
+        const article = await this.articleModel.find().exec();
+        return article.map((art) => ({id: art.id, title: art.title, body: art.body, author: art.author}))
     }
 
-    getSingleArticle(articleID: number){
-        const article = this.findArticle(articleID)[0]
-        return {...article}
+   async getSingleArticle(articleID: number){
+        const article = await this.findArticle(articleID)
+        return {
+            title: article.title,
+            body: article.body,
+            author: article.author,
+        }
     }
 
-    updateProduct(articleID: number, title: string, body: string){
-        const [article, index] = this.findArticle(articleID)
-        const updatedArticle = {...article}
+    async updateArticle(
+        articleID: number, 
+        title: string, 
+        body: string
+    ){
+        const updatedArticle = await this.findArticle(articleID)
         if(title){
-            updatedArticle.title = title
+            updatedArticle.title = title;
         }
         if(body){
-            updatedArticle.body = body
+            updatedArticle.body = body;
         }
-         this.article[index] = updatedArticle;
+        updatedArticle.save();
     }
 
-    deleteArticle(articleID: number){
-        const index = this.findArticle(articleID)[1];
-        this.article.splice(index,1);
+    async deleteArticle(articleID: number){
+        await this.articleModel.deleteOne({_id: articleID}).exec()
     }
 
-    private findArticle(id: number): [Article, number]{
-        const foundArticleIndex = this.article.findIndex((art) => art.id == id)
-        const foundArticle = this.article[foundArticleIndex]
-        if (!foundArticle ){
-            throw new NotFoundException('Could not find article')
+    private async findArticle(id: number): Promise<Article>{
+        let article;
+        try {
+            article = await this.articleModel.findById(id).exec();
+        } catch (error) {
+            throw new NotFoundException('Could not find article.');
         }
-        return [foundArticle, foundArticleIndex]
+        if(!article){
+            throw new NotFoundException('Could not find user.');
+        }
+        return article
     }
 }

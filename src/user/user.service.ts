@@ -53,7 +53,6 @@ export class UserService{
 
     async deleteArticle(userUsername: string){
         await this.userModel.deleteOne({username: userUsername}).exec()
-
     }
 
     private async findUser(username: string): Promise<User>{
