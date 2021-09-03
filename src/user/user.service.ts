@@ -29,10 +29,18 @@ export class UserService{
     async getSingleUser(userUsername: string){
         const user = await this.findUser(userUsername);
         //return user;
-        return { username: user.username, password: user.password, fullname: user.fullname };
+        return { 
+            username: user.username, 
+            password: user.password, 
+            fullname: user.fullname 
+        };
     }
 
-    async updateUser(username: string, password: string, fullname: string){
+    async updateUser(
+        username: string, 
+        password: string, 
+        fullname: string
+    ){
         const updatedUser = await this.findUser(username)
         if(password){
             updatedUser.password = password;
@@ -52,7 +60,7 @@ export class UserService{
         console.log(username)
         let user;
         try{
-            user = await this.userModel.find({"username": username});
+            user = await this.userModel.findOne({"username": username});
         }catch (error){
             throw new NotFoundException('Could not find user.');
         }
